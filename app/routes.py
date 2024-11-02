@@ -571,32 +571,92 @@ responses:
 
 @main.route('/events',methods=['POST'])
 def create_event():
-    data=request.get_json()
+  """
+    Create a new event
+    ---
+    tags:
+      - Events
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            user_id:
+              type: string
+              description: ID of the user creating the task.
+              example: "1f865910-5cd1-41ae-9803-edc2af810ea6"
+            name:
+              type: string
+              description: Name or title of the event.
+              example: "My birthday"
+            description:
+              type: string
+              description: Detailed description of the event.
+              example: "Compile all the project documents and submit by the due date."
+              nullable: true
+            date:
+              type: string
+              format: date
+              description: Date of the event.
+              example: "2024-12-31"
+              nullable: true
+          
+          required:
+            - user_id
+            - name
+    responses:
+      201:
+        description: Event created successfully
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: Unique identifier for the created task.
+              example: 1
+            message:
+              type: string
+              example: 'Event created successfully'
+      400:
+        description: Bad request
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: 'Missing name for the event'
+    """
+  data=request.get_json()
     
-    user_id=data['user_id']
-    name=data['name']
-    description=data['description']
-    date=data['date']
+  user_id=data['user_id']
+  name=data['name']
+  description=data['description']
+  date=data['date']
+  parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
 
-    if name is None:
+  if name is None:
         return({'message':'Missing event name'})
-    if date is None:
+  if date is None:
         return({'message':'Missing date of the event'})
+  
+
     
-    new_event=Event(
+  new_event=Event(
         user_id=user_id,
         name=name,
         description=description,
-        date=date,
+        date=parsed_date,
         created_at=datetime.utcnow(),  # Set created_at to current time
         updated_at=datetime.utcnow()   # Set updated_at to current time
         
     )
 
-    db.session.add(new_event)
-    db.session.commit()
+  db.session.add(new_event)
+  db.session.commit()
 
-    return jsonify({'New event is succesfully created': new_event.id}), 201
+  return jsonify({'New event is succesfully created': new_event.id}), 201
 
 
    
