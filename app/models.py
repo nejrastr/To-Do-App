@@ -52,8 +52,8 @@ class Task(db.Model):
 
 class Goal(db.Model):
     __tablename__ = 'goals'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
     name = db.Column(db.String(50), nullable=False)  
     description = db.Column(db.String(100), nullable=True)  
     start_date = db.Column(db.DateTime, default=datetime.utcnow)  
