@@ -75,8 +75,4 @@ class Event(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-class GoalFrequency(db.Model):
-    __tablename__ = "goal_frequency"
-    id = db.Column(db.Integer, primary_key=True)
-    goal_id = db.Column(db.Integer, db.ForeignKey('goals.id'), nullable=False) 
-    frequency = db.Column(db.Enum(Frequency), nullable=False)  
+

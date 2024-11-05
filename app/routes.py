@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request,jsonify
 from app import db
-from app.models import User, Task, Goal, Event, GoalFrequency
+from app.models import User, Task, Goal, Event
 import uuid
 from datetime import datetime, date
 
@@ -450,8 +450,8 @@ def create_task():
         completed=completed,
         status=status,
         priority=priority,
-        created_at=datetime.utcnow(),  # Set created_at to current time
-        updated_at=datetime.utcnow()   # Set updated_at to current time
+        created_at=datetime.utcnow(),  
+        updated_at=datetime.utcnow()   
     )
 
     db.session.add(new_task)
@@ -1491,4 +1491,6 @@ responses:
         'created_at': goal.created_at.isoformat(),
         'updated_at': goal.updated_at.isoformat()
         
-    },{'message':'Goal is successfully updated'}), 200    
+    },{'message':'Goal is successfully updated'}), 203 
+
+
