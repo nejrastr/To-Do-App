@@ -1040,6 +1040,15 @@ def create_goal():
                 - TBD
               nullable: true.
               example: "IN_PROGRESS"
+            frequency:
+              type: string
+              enum:
+                - DAILY
+                - WEEKLY
+                - MONTHLY
+                - YEARLY
+              nullable: true.
+              example: "WEEKLY"
             priority:
               type: string
               enum:
@@ -1087,6 +1096,7 @@ def create_goal():
     start_date = data.get('start_date')
     end_date = data.get('end_date')
     priority = data.get('priority')
+    frequency=data.get('frequency')
     status = data.get('status')
     
     try:
@@ -1103,6 +1113,7 @@ def create_goal():
         end_date=parsed_end_date,
         priority=priority,
         status=status,
+        frequency=frequency,
         created_at=datetime.utcnow(),  
         updated_at=datetime.utcnow()
     )
@@ -1176,6 +1187,15 @@ def get_goals():
                   - TBD
                 description: Current status of the goal.
                 example: "IN_PROGRESS"
+              frequency:
+                type: string
+                enum:
+                  - WEEKLY
+                  - DAILY
+                  - MONTHLY
+                  - YEARLY
+                description: Current status of the goal.
+                example: "WEEKLY"
               priority:
                 type: string
                 enum:
@@ -1209,6 +1229,7 @@ def get_goals():
         'start_date': str(new_goal.start_date),
         'end_date': str(new_goal.end_date),
         'priority': new_goal.priority.value,
+        'frequency':new_goal.frequency.value,
         'status': new_goal.status.value,
         'created_at': new_goal.created_at.isoformat(),
         'updated_at': new_goal.updated_at.isoformat()
@@ -1274,6 +1295,15 @@ def get_goal(guid):
                 - TBD
               description: Current status of the gaol.
               example: "IN_PROGRESS"
+            frequency:
+                type: string
+                enum:
+                  - WEEKLY
+                  - DAILY
+                  - MONTHLY
+                  - YEARLY
+                description: Current status of the goal.
+                example: "WEEKLY"
             priority:
               type: string
               enum:
@@ -1306,6 +1336,7 @@ def get_goal(guid):
         'description': goal.description,
         'start_date': str(goal.start_date),
         'end_date': str(goal.end_date),
+        'frequency':goal.frequency.value,
         'priority': goal.priority.value,
         'status': goal.status.value,
         'created_at': goal.created_at.isoformat(),
@@ -1400,6 +1431,15 @@ parameters:
           description: Due date for completing the goal.
           example: "2024-12-31"
           nullable: true
+        frequency:
+                type: string
+                enum:
+                  - WEEKLY
+                  - DAILY
+                  - MONTHLY
+                  - YEARLY
+                description: Current status of the goal.
+                example: "WEEKLY"
        
         status:
           type: string
@@ -1456,6 +1496,7 @@ responses:
     description=data.get('description')
     priority=data.get('priority')
     status=data.get('status')
+    frequency=data.get('frequency')
     start_date=data.get('start_date')
     end_date=data.get('end_date')
 
@@ -1477,6 +1518,8 @@ responses:
         goal.priority=priority
     if status is not None:
         goal.status=status
+    if frequency is not None:
+        goal.frequency=frequency
     
     db.session.commit()
 
@@ -1487,6 +1530,7 @@ responses:
         'start_date': str(goal.start_date),
         'end_date': str(goal.end_date),
         'priority': goal.priority.value,
+        'frequency':goal.frequency.value,
         'status': goal.status.value,
         'created_at': goal.created_at.isoformat(),
         'updated_at': goal.updated_at.isoformat()
