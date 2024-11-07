@@ -29,18 +29,19 @@ def create_app():
 
     db.init_app(app)  
 
-    from app.routes.auth_routes import auth
-    from app.routes.goals_routes import goals
-    from app.routes.events_routes import events
-    from app.routes.tasks_routes import tasks
-    from app.routes.routes import main
+  
+    
+    from .auth_routes import auth
+    from .goals_routes import goals
+    from .events_routes import events
+    from .tasks_routes import tasks
+    from .routes  import main
     app.register_blueprint(auth)
     app.register_blueprint(tasks)
     app.register_blueprint(events)
     app.register_blueprint(goals)
     app.register_blueprint(main)
 
-    
     with app.app_context():
 
         db.create_all()  
