@@ -473,6 +473,9 @@ def create_task():
             due_date = datetime.strptime(due_date, "%Y-%m-%d").date()
         except ValueError:
             return jsonify({'message': 'Invalid date format for due_date. Use YYYY-MM-DD.'}), 400
+        
+    if due_date<datetime.utcnow().date():
+        return jsonify("Date should not be in the past"), 400
 
     new_task = Task(
         user_id=user_id,
@@ -585,10 +588,17 @@ responses:
        task.name=data['name']
   if 'description' in data:
         task.description=data['description']
-  if  'due_date' in data:
-        due_date=data['due_date']
-        parsed_due_date = datetime.strptime(due_date, "%Y-%m-%d").date()
-        task.due_date=parsed_due_date
+  if 'due_date' in data:
+        due_date = data['due_date']
+        try:
+            parsed_due_date = datetime.strptime(due_date, "%Y-%m-%d").date()
+            task.due_date = parsed_due_date
+        except ValueError:
+            return jsonify({'message': 'Invalid date format for due_date. Use YYYY-MM-DD.'}), 400
+        
+       
+        if parsed_due_date < datetime.utcnow().date():
+            return jsonify({"message": "Date should not be in the past"}), 400
       
   if 'completed' in data:
         task.completed=data['completed']
@@ -1136,6 +1146,9 @@ def create_goal():
         parsed_end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
     except (ValueError, TypeError):
         return jsonify({'message': 'Invalid date format, use YYYY-MM-DD'}), 400
+    
+    if parsed_start_date>parsed_end_date:
+        return jsonify({"message":"Start date is after the end date"}), 400
 
     new_goal = Goal(
         user_id=user_id,
@@ -1538,6 +1551,9 @@ responses:
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
         except ValueError:
             return jsonify({'message': 'Invalid date format for due_date. Use YYYY-MM-DD.'}), 400
+        
+    if start_date>end_date:
+        return jsonify({"message":"Start date is after the end date"}), 400
     if name is not None:
         goal.name=name
     if description is not None:
