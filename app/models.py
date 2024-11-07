@@ -47,21 +47,26 @@ class User(db.Model):
         number_of_monthly_goals = sum(1 for goal in self.goals if goal.frequency == Frequency.MONTHLY)
         number_of_yearly_goals = sum(1 for goal in self.goals if goal.frequency == Frequency.YEARLY)
         
+   
        
-        if number_of_daily_goals == 0 or number_of_weekly_goals == 0 or number_of_monthly_goals == 0 or number_of_yearly_goals == 0:
-            return 0, 0, 0, 0  
-
-      
         number_of_completed_goals_daily = sum(1 for goal in self.goals if goal.status == Status.DONE and goal.frequency == Frequency.DAILY)
         number_of_completed_goals_weekly = sum(1 for goal in self.goals if goal.status == Status.DONE and goal.frequency == Frequency.WEEKLY)
         number_of_completed_goals_monthly = sum(1 for goal in self.goals if goal.status == Status.DONE and goal.frequency == Frequency.MONTHLY)
         number_of_completed_goals_yearly = sum(1 for goal in self.goals if goal.status == Status.DONE and goal.frequency == Frequency.YEARLY)
-
-    
-        daily_progress = int((number_of_completed_goals_daily / number_of_daily_goals) * 100)
-        weekly_progress = int((number_of_completed_goals_weekly / number_of_weekly_goals) * 100)
-        monthly_progress = int((number_of_completed_goals_monthly / number_of_monthly_goals) * 100)
-        yearly_progress = int((number_of_completed_goals_yearly / number_of_yearly_goals) * 100)
+        
+        daily_progress = 0
+        weekly_progress = 0
+        monthly_progress = 0
+        yearly_progress = 0
+       
+        if(number_of_daily_goals>0):
+         daily_progress = int((number_of_completed_goals_daily / number_of_daily_goals) * 100)
+        if(number_of_weekly_goals>0):
+         weekly_progress = int((number_of_completed_goals_weekly / number_of_weekly_goals) * 100)
+        if(number_of_monthly_goals>0):
+         monthly_progress = int((number_of_completed_goals_monthly / number_of_monthly_goals) * 100)
+        if(number_of_yearly_goals>0):
+         yearly_progress = int((number_of_completed_goals_yearly / number_of_yearly_goals) * 100)
 
         return daily_progress, weekly_progress, monthly_progress, yearly_progress
     
