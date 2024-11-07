@@ -10,6 +10,7 @@ db = SQLAlchemy()
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    app.name="ToBeDo"
     template = {
     "swagger": "2.0",
     "info": {
@@ -32,10 +33,6 @@ def create_app():
     app.register_blueprint(main)
 
     with app.app_context():
-        from .models import Task
-        from .models import User
-        from .models import Goal
-        from .models import Event
 
         db.create_all()  
 

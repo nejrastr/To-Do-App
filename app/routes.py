@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request,jsonify
 from app import db
 from app.models import User, Task, Goal, Event
+import re
 
 from datetime import datetime
 
@@ -46,9 +47,25 @@ def create_user():
     
     username = data.get('username')
     password = data.get('password')
+
+    
     
     if not username or not password:
         return jsonify({'message': 'Username and password are required'}), 400
+    if len(username) < 4 or len(username) > 20:
+        return jsonify({"error": "Username must be between 4 and 20 characters"}), 400
+    if username.isalnum() is False:
+        return jsonify({"error":"User must contain only alphanumeric characters."}), 400
+    if len(password) < 8:
+        return jsonify({"error": "Password must be more than 8 characters"}), 400
+    if not re.search(r"[A-Z]", password):
+        return jsonify("Password must contain at least one uppercase letter"), 400
+    if not re.search(r"[0-9]", password):
+        return jsonify("Password must contain at least one digit."), 400
+    if not re.search(r"[!@#$%^&*()_+{}\[\]:;\"\'<>,.?/~`\\|-]", password):
+        return jsonify("Password must contain at least one specia character."), 400
+    
+    
     
     if User.query.filter_by(username=username).first():
        return jsonify({'message': 'Username already exists!'}), 400
@@ -140,9 +157,24 @@ def update_user(guid):
         return ({'message':'User is not found.'}), 404
     
     data=request.get_json()
-
+    username=data['username']
+    password=data['password']
     if not data:
         return ({'message': 'Request body is empty!'}), 400
+    
+    if len(username) < 4 or len(username) > 20:
+        return jsonify({"error": "Username must be between 4 and 20 characters"}), 400
+    if username.isalnum() is False:
+        return jsonify({"error":"User must contain only alphanumeric characters."}), 400
+    if len(password) < 8:
+        return jsonify({"error": "Password must be more than 8 characters"}), 400
+    if not re.search(r"[A-Z]", password):
+        return jsonify("Password must contain at least one uppercase letter"), 400
+    if not re.search(r"[0-9]", password):
+        return jsonify("Password must contain at least one digit."), 400
+    if not re.search(r"[!@#$%^&*()_+{}\[\]:;\"\'<>,.?/~`\\|-]", password):
+        return jsonify("Password must contain at least one specia character."), 400
+    
     if 'username' in data:
         user.username=data['username']
     if 'password' in data:
