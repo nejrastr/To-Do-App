@@ -1,5 +1,5 @@
 from app import create_app, db
-import json
+
 from app.models import User
 
 

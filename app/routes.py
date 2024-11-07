@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request,jsonify
 from app import db
 from app.models import User, Task, Goal, Event
-import uuid
-from datetime import datetime, date
 
-import json
+from datetime import datetime
+
+
 
 
 
