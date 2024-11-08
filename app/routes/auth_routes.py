@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 import re
 from app.models import User
 from app import db
+from ..schema.user_schema import UserSchema
+from marshmallow import ValidationError
 
 
 auth=Blueprint('auth', __name__)
@@ -34,40 +36,21 @@ def create_user():
       400:
         description: Username already exists
     """
-    data = request.get_json()
-    
-    username = data.get('username')
-    password = data.get('password')
+    user_schema=UserSchema(session=db.session)
 
-    
-    
-    if not username or not password:
-        return jsonify({'message': 'Username and password are required'}), 400
-    if len(username) < 4 or len(username) > 20:
-        return jsonify({"error": "Username must be between 4 and 20 characters"}), 400
-    if username.isalnum() is False:
-        return jsonify({"error":"User must contain only alphanumeric characters."}), 400
-    if len(password) < 8:
-        return jsonify({"error": "Password must be more than 8 characters"}), 400
-    if not re.search(r"[A-Z]", password):
-        return jsonify("Password must contain at least one uppercase letter"), 400
-    if not re.search(r"[0-9]", password):
-        return jsonify("Password must contain at least one digit."), 400
-    if not re.search(r"[!@#$%^&*()_+{}\[\]:;\"\'<>,.?/~`\\|-]", password):
-        return jsonify("Password must contain at least one specia character."), 400
-    
-    
-    
-    if User.query.filter_by(username=username).first():
-       return jsonify({'message': 'Username already exists!'}), 400
+    try:
+        user_data=user_schema.load(request.json)
 
-    new_user = User(username=username)
-    new_user.set_password(password)
-    
-    db.session.add(new_user)
-    db.session.commit()
-    
-    return jsonify({'message': 'User created successfully'}), 201
+        if User.query.filter_by(username=user_data.username).first():
+            return ({"error":"Username alredy exists."}), 409
+
+        db.session.add(user_data)
+        db.session.commit()
+        user_response=user_schema.dump(user_data)
+        user_response.pop('password')
+        return jsonify(user_response), 201
+    except ValidationError as err:
+        return jsonify({"errors":err.messages}), 400
 
 @auth.route('/user/<string:guid>', methods=['GET'])
 def get_user(guid):

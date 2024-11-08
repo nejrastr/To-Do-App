@@ -1,7 +1,7 @@
 from app import db
 from datetime import datetime
 from enum import Enum
-from werkzeug.security import generate_password_hash,check_password_hash
+
 import uuid
 
 class PriorityEnum(Enum):
@@ -28,10 +28,7 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    def set_password(self, password):
-        self.password=generate_password_hash(password)
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
+   
     
     def calculate_task_progress(self):
         number_of_tasks=len(self.tasks)
