@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 from app import db
 from app.models import Task
 from datetime import datetime
+from ..schema.task_schema import TaskSchema
+from marshmallow import ValidationError
 
 tasks=Blueprint('tasks', __name__)
 
@@ -271,49 +273,17 @@ def create_task():
               type: string
               example: 'Missing name for the task'
     """
-   
-    data = request.get_json()
-    
-    user_id = data.get('user_id') 
-    name = data.get('name')
-    description = data.get('description')
-    due_date = data.get('due_date')
-    completed = data.get('completed', False)  # Default to False if not provided
-    priority = data.get('priority')
-    status = data.get('status')
-    
-    if user_id is None:
-        return jsonify({'message': 'There is no user with this id.'}), 400
+    task_schema=TaskSchema(session=db.session)
+  
+    try:
+      task_data=task_schema.load(request.json)
+      db.session.add(task_data)
+      db.session.commit()
+      return jsonify(task_schema.dump(task_data)), 201
+    except ValidationError as err:
+      return jsonify(err.messages)
 
-    if not name:
-        return jsonify({'message': 'Missing name for the task'}), 400
-    
-    
-    if due_date:
-        try:
-            due_date = datetime.strptime(due_date, "%Y-%m-%d").date()
-        except ValueError:
-            return jsonify({'message': 'Invalid date format for due_date. Use YYYY-MM-DD.'}), 400
-        
-    if due_date<datetime.utcnow().date():
-        return jsonify("Date should not be in the past"), 400
-
-    new_task = Task(
-        user_id=user_id,
-        name=name,
-        description=description,
-        due_date=due_date,
-        completed=completed,
-        status=status,
-        priority=priority,
-        created_at=datetime.utcnow(),  
-        updated_at=datetime.utcnow()   
-    )
-
-    db.session.add(new_task)
-    db.session.commit()
-
-    return jsonify({'id': new_task.id, 'message': 'Task created successfully'}), 201
+  
 
 @tasks.route('/task/<string:guid>', methods=['PUT'])
 def update_task(guid):
@@ -395,42 +365,31 @@ responses:
           type: string
           example: 'Request body is missing'
 """
-
+  task_schema=TaskSchema(session=db.session)
     
-  task=Task.query.filter_by(id=guid).first()
-  if task is None:
-    return({'message':'This task does not exist'}), 404
-  data=request.get_json()
- 
-  
-  if not data:
-        return({'message':'Request body is missing'})
-  if 'username' in data:
-       task.name=data['name']
-  if 'description' in data:
-        task.description=data['description']
-  if 'due_date' in data:
-        due_date = data['due_date']
-        try:
-            parsed_due_date = datetime.strptime(due_date, "%Y-%m-%d").date()
-            task.due_date = parsed_due_date
-        except ValueError:
-            return jsonify({'message': 'Invalid date format for due_date. Use YYYY-MM-DD.'}), 400
-        
+  try: 
+       task=Task.query.filter_by(id=guid).first()
+       if task is None:
+         return({'message':'This task does not exist'}), 404
+       task_data=task_schema.load(request.json)
+       if task_data.name:
+        task.name=task_data.name
+       if task_data.description:
+        task.name=task_data.description
+       if task_data.due_date:
+        task.due_date = task_data.due_date
+       if task_data.completed:
+        task.completed=task_data.completed
+       if task_data.status:
+        task.status=task_data.status
+       if task_data.priority:
+        task.priority=task_data.priority
        
-        if parsed_due_date < datetime.utcnow().date():
-            return jsonify({"message": "Date should not be in the past"}), 400
-      
-  if 'completed' in data:
-        task.completed=data['completed']
-  if 'priority' in data:
-        task.priority=data['priority']
-  if 'status' in data:
-        task.status=data['status']  
-    
-  db.session.commit()
-
-  return jsonify({'message':'Task is updated successfully'}), 200
+        db.session.commit()
+        return jsonify(task_schema.dump(task_data)), 200
+  except ValidationError as err:
+     return(err.messages), 400
+  
 
 @tasks.route('/tasks/<string:guid>', methods=['DELETE'])
 def delete_task(guid):

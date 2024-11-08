@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 from app import db
 from app.models import Event
 from datetime import datetime
+from ..schema.event_schema import EventSchema
+from marshmallow import ValidationError
 
 events=Blueprint('events', __name__)
 
@@ -64,35 +66,14 @@ def create_event():
               type: string
               example: 'Missing name for the event'
     """
-  data=request.get_json()
-    
-  user_id=data['user_id']
-  name=data['name']
-  description=data['description']
-  date=data['date']
-  parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
-
-  if name is None:
-        return({'message':'Missing event name'})
-  if date is None:
-        return({'message':'Missing date of the event'})
-  
-
-    
-  new_event=Event(
-        user_id=user_id,
-        name=name,
-        description=description,
-        date=parsed_date,
-        created_at=datetime.utcnow(),  # Set created_at to current time
-        updated_at=datetime.utcnow()   # Set updated_at to current time
-        
-    )
-
-  db.session.add(new_event)
-  db.session.commit()
-
-  return jsonify({'New event is succesfully created': new_event.id}), 201
+  event_schema=EventSchema(session=db.session)
+  try:
+     event_data=event_schema.load(request.json)
+     db.session.add(event_data)
+     db.session.commit()
+     return jsonify("Event successfully created", event_schema.dump(event_data)), 201
+  except ValidationError as err:
+    return jsonify(err.messages)
 
 @events.route('/events/<string:guid>', methods=['GET'])
 def get_event(guid): 
@@ -296,35 +277,29 @@ responses:
           example: 'Request body is missing'
 """
 
-    
-    event=Event.query.get(guid)
-
-    if not event:
+    event_schema=EventSchema(session=db.session)
+    try:
+       
+      event=Event.query.get(guid)
+      if not event:
         return({'message':'There is no event with this id.'})
     
-    data=request.get_json()
+      event_data=event_schema.load(request.json)
 
-    if 'username' in data:
-       event.name=data['name']
-    if 'description' in data:
-        event.description=data['description']
-    if  'date' in data:
-        date=data['date']
-        parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
-        event.date=parsed_date
-    
-    db.session.commit()
+      if event_data.name:  
+            event.name = event_data.name
+      if event_data.description: 
+            event.description = event_data.description
+      if event_data.date:  
+            event.date = event_data.date
 
-    return jsonify({
-        'id':event.id,
-        'user_id':event.user_id,
-        'name':event.name,
-        'description':event.description,
-        'date':event.date,
-        'created_at':event.created_at,
-        'updated_at':event.updated_at
-        
-    })
+      
+      db.session.commit()
+
+      return jsonify(event_schema.dump(event)), 200
+    except ValidationError as err:
+      return jsonify(err.messages)
+
 
 
 @events.route('/events/<string:guid>', methods=['DELETE'])

@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 from app.models import Goal
 from app import db
 from datetime import datetime
+from ..schema.goal_schema import GoalSchema
+from marshmallow import ValidationError
 
 goals=Blueprint('goals', __name__)
 
@@ -95,59 +97,16 @@ def create_goal():
               type: string
               example: 'Missing name for the goal'
     """
-    data = request.get_json()
-
-    user_id = data.get('user_id')
-    if user_id is None:
-        return jsonify({'message': 'Missing user ID'}), 400
-    
-    name = data.get('name')
-    if not name:
-        return jsonify({'message': 'Missing name for goal'}), 400
-    
-    description = data.get('description')
-    start_date = data.get('start_date')
-    end_date = data.get('end_date')
-    priority = data.get('priority')
-    frequency=data.get('frequency')
-    status = data.get('status')
-    
+    goal_schema=GoalSchema(session=db.session)
     try:
-        parsed_start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
-        parsed_end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-    except (ValueError, TypeError):
-        return jsonify({'message': 'Invalid date format, use YYYY-MM-DD'}), 400
+      
+        goal_data=goal_schema.load(request.json)
+        db.session.add(goal_data)
+        db.session.commit()
+        return jsonify(goal_schema.dump(goal_data)), 201
+    except ValidationError as err:
+        return jsonify(err.messages), 400    
     
-    if parsed_start_date>parsed_end_date:
-        return jsonify({"message":"Start date is after the end date"}), 400
-
-    new_goal = Goal(
-        user_id=user_id,
-        name=name,
-        description=description,
-        start_date=parsed_start_date,
-        end_date=parsed_end_date,
-        priority=priority,
-        status=status,
-        frequency=frequency,
-        created_at=datetime.utcnow(),  
-        updated_at=datetime.utcnow()
-    )
-
-    db.session.add(new_goal)
-    db.session.commit()
-    return jsonify({
-        'id': new_goal.id,
-        'user_id': new_goal.user_id,
-        'name': new_goal.name,
-        'description': new_goal.description,
-        'start_date': str(new_goal.start_date),
-        'end_date': str(new_goal.end_date),
-        'priority': new_goal.priority.value,
-        'status': new_goal.status.value,
-        'created_at': new_goal.created_at.isoformat(),
-        'updated_at': new_goal.updated_at.isoformat()
-    }), 201
 
 
 @goals.route('/goals', methods=['GET'])
@@ -410,150 +369,128 @@ def delete_goal(guid):
 @goals.route('/goals/<string:guid>', methods=['PUT'])
 def update_goal(guid):
     """
-Update an existing goal
----
-tags:
-  - Goal
-parameters:
-  - name: guid
-    in: path
-    required: true
-    type: string
-    description: Unique identifier (GUID) for the goal.
-  - name: body
-    in: body
-    required: true
-    schema:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Name or title of the goal.
-          example: "Finish the project documentation"
-        description:
-          type: string
-          description: Detailed description of the goal.
-          example: "Compile all the project documents and submit by the due date."
-          nullable: true
-        start_date:
-          type: string
-          format: date
-          description: Due date for completing the task.
-          example: "2024-12-31"
-          nullable: true
-        end_date:
-          type: string
-          format: date
-          description: Due date for completing the goal.
-          example: "2024-12-31"
-          nullable: true
-        frequency:
-                type: string
-                enum:
-                  - WEEKLY
-                  - DAILY
-                  - MONTHLY
-                  - YEARLY
-                description: Current status of the goal.
-                example: "WEEKLY"
+    Update an existing goal
+    ---
+    tags:
+      - Goal
+    parameters:
+      - name: guid
+        in: path
+        required: true
+        type: string
+        description: Unique identifier (GUID) for the goal.
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Name or title of the goal.
+              example: "Finish the project documentation"
+            description:
+              type: string
+              description: Detailed description of the goal.
+              example: "Compile all the project documents and submit by the due date."
+              nullable: true
+            start_date:
+              type: string
+              format: date
+              description: Start date for the goal.
+              example: "2024-12-31"
+              nullable: true
+            end_date:
+              type: string
+              format: date
+              description: End date for completing the goal.
+              example: "2024-12-31"
+              nullable: true
+            frequency:
+              type: string
+              enum:
+                - WEEKLY
+                - DAILY
+                - MONTHLY
+                - YEARLY
+              description: Frequency of the goal.
+              example: "WEEKLY"
+            status:
+              type: string
+              enum:
+                - DONE
+                - IN_PROGRESS
+                - TBD
+              description: Current status of the goal.
+              example: "IN_PROGRESS"
+            priority:
+              type: string
+              enum:
+                - LOW
+                - MEDIUM
+                - HIGH
+              description: Priority level of the goal.
+              example: "HIGH"
+    responses:
+      200:
+        description: Goal updated successfully
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: 'Goal is updated successfully'
+      404:
+        description: Goal not found
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: 'This goal does not exist'
+      400:
+        description: Bad request
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+              example: 'Request body is missing'
+    """
+    goal_schema = GoalSchema(session=db.session)
+    try:
+        
+        goal_data = goal_schema.load(request.json)
+
+        
+        goal = Goal.query.filter_by(id=guid).first()
+
+        if goal is None:
+            return {'message': 'There is no goal with this ID.'}, 404
+
+        
+        if goal_data.name:
+            goal.name = goal_data.name
+        if goal_data.description:
+            goal.description = goal_data.description
+        if goal_data.start_date:
+            goal.start_date = goal_data.start_date
+        if goal_data.end_date:
+            goal.end_date = goal_data.end_date
+        if goal_data.priority:
+            goal.priority = goal_data.priority
+        if goal_data.status:
+            goal.status = goal_data.status
+        if goal_data.frequency:
+            goal.frequency = goal_data.frequency
+
        
-        status:
-          type: string
-          enum:
-            - DONE
-            - IN_PROGRESS
-            - TBD
-          description: Current status of the goal.
-          example: "IN_PROGRESS"
-        priority:
-          type: string
-          enum:
-            - LOW
-            - MEDIUM
-            - HIGH
-          description: Priority level of the goal.
-          example: "HIGH"
-responses:
-  200:
-    description: Goal updated successfully
-    schema:
-      type: object
-      properties:
-        message:
-          type: string
-          example: 'Goal is updated successfully'
-  404:
-    description: Goal not found
-    schema:
-      type: object
-      properties:
-        message:
-          type: string
-          example: 'This gaol does not exist'
-  400:
-    description: Bad request
-    schema:
-      type: object
-      properties:
-        message:
-          type: string
-          example: 'Request body is missing'
-"""
-    
-    goal=Goal.query.filter_by(id=guid).first()
-    data=request.get_json()
+        db.session.commit()
 
-    if goal is None:
-        return({'message':'There is no goal with this ID.'}), 404
-    if data is None:
-        return({'message':'Missing request body'}), 400
-    
-    name=data.get('name')
-    description=data.get('description')
-    priority=data.get('priority')
-    status=data.get('status')
-    frequency=data.get('frequency')
-    start_date=data.get('start_date')
-    end_date=data.get('end_date')
+        return {'message': 'Goal is updated successfully'}, 200
 
-    if start_date or end_date:
-        try:
-            start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
-            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-        except ValueError:
-            return jsonify({'message': 'Invalid date format for due_date. Use YYYY-MM-DD.'}), 400
-        
-    if start_date>end_date:
-        return jsonify({"message":"Start date is after the end date"}), 400
-    if name is not None:
-        goal.name=name
-    if description is not None:
-        goal.description=description
-    if start_date is not None:
-        goal.start_date=start_date
-    if end_date is not None:
-        goal.end_date=end_date
-    if priority is not None:
-        goal.priority=priority
-    if status is not None:
-        goal.status=status
-    if frequency is not None:
-        goal.frequency=frequency
-    
-    db.session.commit()
+    except ValidationError as err:
+        return jsonify(err.messages), 400
 
-    return jsonify({'id': goal.id,
-        'user_id': goal.user_id,
-        'name': goal.name,
-        'description': goal.description,
-        'start_date': str(goal.start_date),
-        'end_date': str(goal.end_date),
-        'priority': goal.priority.value,
-        'frequency':goal.frequency.value,
-        'status': goal.status.value,
-        'created_at': goal.created_at.isoformat(),
-        'updated_at': goal.updated_at.isoformat()
-        
-    },{'message':'Goal is successfully updated'}), 203 
 
 
