@@ -10,9 +10,9 @@ class UserSchema(SQLAlchemyAutoSchema):
         model=User
         load_instance=True
         sql_session=db.session
-    username=fields.String(required=True, validate=lambda x: len(x)>4 and len(x)<20)
-    password=fields.String(required=True, validate=lambda x: len(x)>8)
-
+    username=fields.String( validate=lambda x: len(x)>4 and len(x)<20)
+    password=fields.String( validate=lambda x: len(x)>8)
+    
     @validates("password")
     def validate_password_strength(self,value):
         if not any(char.isupper() for char in value):

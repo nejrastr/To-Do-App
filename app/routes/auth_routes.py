@@ -81,7 +81,7 @@ def get_user(guid):
         description: User not found
     """
  
-    user = User.query.get(guid)  # Corrected parameter name
+    user = User.query.get(guid)  
 
     if user is None:
         return {'message': 'User is not found.'}, 404
@@ -97,7 +97,7 @@ def get_user(guid):
 def update_user(guid):
     """
     Update user by ID
-    ---
+    --- 
     tags:
       - User
     parameters:
@@ -124,37 +124,28 @@ def update_user(guid):
       404:
         description: User not found
     """
-    
-    user=User.query.filter_by(id=guid).first()
-    
-    if user is None:
-        return ({'message':'User is not found.'}), 404
-    
-    data=request.get_json()
-    username=data['username']
-    password=data['password']
-    if not data:
-        return ({'message': 'Request body is empty!'}), 400
-    
-    if len(username) < 4 or len(username) > 20:
-        return jsonify({"error": "Username must be between 4 and 20 characters"}), 400
-    if username.isalnum() is False:
-        return jsonify({"error":"User must contain only alphanumeric characters."}), 400
-    if len(password) < 8:
-        return jsonify({"error": "Password must be more than 8 characters"}), 400
-    if not re.search(r"[A-Z]", password):
-        return jsonify("Password must contain at least one uppercase letter"), 400
-    if not re.search(r"[0-9]", password):
-        return jsonify("Password must contain at least one digit."), 400
-    if not re.search(r"[!@#$%^&*()_+{}\[\]:;\"\'<>,.?/~`\\|-]", password):
-        return jsonify("Password must contain at least one specia character."), 400
-    
-    if 'username' in data:
-        user.username=data['username']
-    if 'password' in data:
-        user.set_password(data['password'])
-    
-    db.session.commit()
+    user_schema = UserSchema(session=db.session)
 
-    return jsonify({'message':'User is updated successfully'}), 200
-    
+    try:
+        user = User.query.filter_by(id=guid).first()  
+
+        if user is None:
+            return {'message': 'User is not found.'}, 404 
+
+        
+        user_data = user_schema.load(request.json)
+
+      
+        if 'username' in user_data:
+            user.username = user_data['username']
+        if 'password' in user_data:
+            user.password = user_data['password']
+
+       
+        db.session.commit()
+
+        return jsonify("User is successfully updated"), 200
+
+    except ValidationError as err:
+        return jsonify({"error": err.messages}), 400
+
