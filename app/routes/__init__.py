@@ -31,11 +31,11 @@ def create_app():
 
   
     
-    from .auth_routes import auth
-    from .goals_routes import goals
-    from .events_routes import events
-    from .tasks_routes import tasks
-    from .routes  import main
+    from .auth import auth
+    from .goals import goals
+    from .events import events
+    from .tasks import tasks
+    from .main  import main
     app.register_blueprint(auth)
     app.register_blueprint(tasks)
     app.register_blueprint(events)
