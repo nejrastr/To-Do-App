@@ -135,11 +135,9 @@ def update_user(guid):
         
         user_data = user_schema.load(request.json)
 
-      
-        if 'username' in user_data:
-            user.username = user_data['username']
-        if 'password' in user_data:
-            user.password = user_data['password']
+    
+        user.username = user_data.username
+        user.password = user_data.password
 
        
         db.session.commit()

@@ -285,18 +285,15 @@ responses:
         return({'message':'There is no event with this id.'})
     
       event_data=event_schema.load(request.json)
+      event.name=event_data.name
+      event.description=event_data.description
+      event.date=event_data.date
 
-      if event_data.name:  
-            event.name = event_data.name
-      if event_data.description: 
-            event.description = event_data.description
-      if event_data.date:  
-            event.date = event_data.date
 
       
       db.session.commit()
 
-      return jsonify(event_schema.dump(event)), 200
+      return jsonify(event_schema.dump(event_data)), 200
     except ValidationError as err:
       return jsonify(err.messages)
 

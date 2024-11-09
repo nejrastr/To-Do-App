@@ -372,21 +372,21 @@ responses:
        if task is None:
          return({'message':'This task does not exist'}), 404
        task_data=task_schema.load(request.json)
-       if task_data.name:
-        task.name=task_data.name
-       if task_data.description:
-        task.name=task_data.description
-       if task_data.due_date:
-        task.due_date = task_data.due_date
-       if task_data.completed:
-        task.completed=task_data.completed
-       if task_data.status:
-        task.status=task_data.status
-       if task_data.priority:
-        task.priority=task_data.priority
+      
+       task.name=task_data.name
        
-        db.session.commit()
-        return jsonify(task_schema.dump(task_data)), 200
+       task.name=task_data.description
+      
+       task.due_date = task_data.due_date
+       
+       task.completed=task_data.completed
+      
+       task.status=task_data.status
+      
+       task.priority=task_data.priority
+       
+       db.session.commit()
+       return jsonify(task_schema.dump(task_data)), 200
   except ValidationError as err:
      return(err.messages), 400
   

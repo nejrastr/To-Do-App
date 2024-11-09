@@ -469,20 +469,19 @@ def update_goal(guid):
             return {'message': 'There is no goal with this ID.'}, 404
 
         
-        if goal_data.name:
-            goal.name = goal_data.name
-        if goal_data.description:
-            goal.description = goal_data.description
-        if goal_data.start_date:
-            goal.start_date = goal_data.start_date
-        if goal_data.end_date:
-            goal.end_date = goal_data.end_date
-        if goal_data.priority:
-            goal.priority = goal_data.priority
-        if goal_data.status:
-            goal.status = goal_data.status
-        if goal_data.frequency:
-            goal.frequency = goal_data.frequency
+        goal.name = goal_data.name
+       
+        goal.description = goal_data.description
+       
+        goal.start_date = goal_data.start_date
+        
+        goal.end_date = goal_data.end_date
+        
+        goal.priority = goal_data.priority
+       
+        goal.status = goal_data.status
+       
+        goal.frequency = goal_data.frequency
 
        
         db.session.commit()

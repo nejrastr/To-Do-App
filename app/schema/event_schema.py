@@ -11,6 +11,6 @@ class EventSchema(SQLAlchemyAutoSchema):
         sql_session=db.session
     user_id=fields.String(required=False)
     name=fields.String(required=True, validate=lambda x: len(x)>5)
-    description=fields.String(required=False)
-    date=fields.Date(required=False)
+    description=fields.String(required=True)
+    date=fields.Date(required=True)
 
