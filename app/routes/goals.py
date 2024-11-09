@@ -5,9 +5,10 @@ from datetime import datetime
 from ..schema.goal_schema import GoalSchema
 from marshmallow import ValidationError
 
-goals=Blueprint('goals', __name__)
+goals = Blueprint("goals", __name__)
 
-@goals.route('/goals', methods=['POST'])
+
+@goals.route("/goals", methods=["POST"])
 def create_goal():
     """
     Create a new goal
@@ -46,7 +47,7 @@ def create_goal():
               description: Due date for completing the goal.
               example: "2024-12-31"
               nullable: true
-           
+
             status:
               type: string
               enum:
@@ -97,19 +98,18 @@ def create_goal():
               type: string
               example: 'Missing name for the goal'
     """
-    goal_schema=GoalSchema(session=db.session)
+    goal_schema = GoalSchema(session=db.session)
     try:
-      
-        goal_data=goal_schema.load(request.json)
+
+        goal_data = goal_schema.load(request.json)
         db.session.add(goal_data)
         db.session.commit()
         return jsonify(goal_schema.dump(goal_data)), 201
     except ValidationError as err:
-        return jsonify(err.messages), 400    
-    
+        return jsonify(err.messages), 400
 
 
-@goals.route('/goals', methods=['GET'])
+@goals.route("/goals", methods=["GET"])
 def get_goals():
     """
     Get a list of goals
@@ -192,28 +192,32 @@ def get_goals():
       404:
         description: No goals found
     """
-    goals=Goal.query.all()
+    goals = Goal.query.all()
 
     if goals is None:
-      return({'message':'There is no cretaed goals'})
-    
-    list_of_goals=[{'id': new_goal.id,
-        'user_id': new_goal.user_id,
-        'name': new_goal.name,
-        'description': new_goal.description,
-        'start_date': str(new_goal.start_date),
-        'end_date': str(new_goal.end_date),
-        'priority': new_goal.priority.value,
-        'frequency':new_goal.frequency.value,
-        'status': new_goal.status.value,
-        'created_at': new_goal.created_at.isoformat(),
-        'updated_at': new_goal.updated_at.isoformat()
-        
-    } for new_goal in goals]
+        return {"message": "There is no cretaed goals"}
+
+    list_of_goals = [
+        {
+            "id": new_goal.id,
+            "user_id": new_goal.user_id,
+            "name": new_goal.name,
+            "description": new_goal.description,
+            "start_date": str(new_goal.start_date),
+            "end_date": str(new_goal.end_date),
+            "priority": new_goal.priority.value,
+            "frequency": new_goal.frequency.value,
+            "status": new_goal.status.value,
+            "created_at": new_goal.created_at.isoformat(),
+            "updated_at": new_goal.updated_at.isoformat(),
+        }
+        for new_goal in goals
+    ]
 
     return jsonify(list_of_goals)
-    
-@goals.route('/goals/<string:guid>', methods=['GET'])
+
+
+@goals.route("/goals/<string:guid>", methods=["GET"])
 def get_goal(guid):
     """
     Get goal by ID
@@ -261,7 +265,7 @@ def get_goal(guid):
               description: completed goal at.
               example: "2024-12-31"
               nullable: true
-           
+
             status:
               type: string
               enum:
@@ -300,25 +304,31 @@ def get_goal(guid):
       404:
         description: Goal with this ID does not exist
     """
-    
-    goal=Goal.query.filter_by(id=guid).first()
+
+    goal = Goal.query.filter_by(id=guid).first()
     if goal is None:
-        return({'message':'Goal with this ID does not exist.'}), 400
-    return jsonify({
-        'id': goal.id,
-        'user_id': goal.user_id,
-        'name': goal.name,
-        'description': goal.description,
-        'start_date': str(goal.start_date),
-        'end_date': str(goal.end_date),
-        'frequency':goal.frequency.value,
-        'priority': goal.priority.value,
-        'status': goal.status.value,
-        'created_at': goal.created_at.isoformat(),
-        'updated_at': goal.updated_at.isoformat()
-    }), 200
- 
-@goals.route('/goals/<string:guid>', methods=['DELETE'])
+        return ({"message": "Goal with this ID does not exist."}), 400
+    return (
+        jsonify(
+            {
+                "id": goal.id,
+                "user_id": goal.user_id,
+                "name": goal.name,
+                "description": goal.description,
+                "start_date": str(goal.start_date),
+                "end_date": str(goal.end_date),
+                "frequency": goal.frequency.value,
+                "priority": goal.priority.value,
+                "status": goal.status.value,
+                "created_at": goal.created_at.isoformat(),
+                "updated_at": goal.updated_at.isoformat(),
+            }
+        ),
+        200,
+    )
+
+
+@goals.route("/goals/<string:guid>", methods=["DELETE"])
 def delete_goal(guid):
     """
     Delete an existing goal
@@ -357,16 +367,17 @@ def delete_goal(guid):
               type: string
               example: "Invalid GUID format or missing GUID"
     """
-    goal=Goal.query.filter_by(id=guid).first()
+    goal = Goal.query.filter_by(id=guid).first()
 
     if goal is None:
-        return({'message':'Goal with this ID does not exist.'}), 404
+        return ({"message": "Goal with this ID does not exist."}), 404
     db.session.delete(goal)
     db.session.commit()
 
-    return jsonify({'message':'Goal is successfully deleted.'}), 200
+    return jsonify({"message": "Goal is successfully deleted."}), 200
 
-@goals.route('/goals/<string:guid>', methods=['PUT'])
+
+@goals.route("/goals/<string:guid>", methods=["PUT"])
 def update_goal(guid):
     """
     Update an existing goal
@@ -459,37 +470,31 @@ def update_goal(guid):
     """
     goal_schema = GoalSchema(session=db.session)
     try:
-        
+
         goal_data = goal_schema.load(request.json)
 
-        
         goal = Goal.query.filter_by(id=guid).first()
 
         if goal is None:
-            return {'message': 'There is no goal with this ID.'}, 404
+            return {"message": "There is no goal with this ID."}, 404
 
-        
         goal.name = goal_data.name
-       
+
         goal.description = goal_data.description
-       
+
         goal.start_date = goal_data.start_date
-        
+
         goal.end_date = goal_data.end_date
-        
+
         goal.priority = goal_data.priority
-       
+
         goal.status = goal_data.status
-       
+
         goal.frequency = goal_data.frequency
 
-       
         db.session.commit()
 
-        return {'message': 'Goal is updated successfully'}, 200
+        return {"message": "Goal is updated successfully"}, 200
 
     except ValidationError as err:
         return jsonify(err.messages), 400
-
-
-
