@@ -192,10 +192,24 @@ def get_goals():
       404:
         description: No goals found
     """
-    goals = Goal.query.all()
+    frequency=request.args.get("frequency")
+    priority=request.args.get("priority")
+    status=request.args.get("status")
+
+    query=Goal.query
+
+    if frequency:
+        query=query.filter(Goal.frequency==frequency)
+    if priority:
+        query=query.filter(Goal.priority==priority)
+    if status:
+        query=query.filter(Goal.status==status)
+    
+
+    goals = query.all()
 
     if goals is None:
-        return {"message": "There is no cretaed goals"}
+        return {"message": "No goals found."}
 
     list_of_goals = [
         {

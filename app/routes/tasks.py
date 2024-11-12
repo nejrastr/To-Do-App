@@ -79,10 +79,20 @@ def get_tasks():
       404:
         description: No tasks found
     """
+    status=request.args.get("status")
+    priority=request.args.get("priority")
+    
+    query=Task.query
 
-    tasks = Task.query.all()
+    if status:
+        query=query.filter(Task.status==status)
+    if priority:
+        query=query.filter(Task.priority==priority)
+    
+    tasks=query.all()
+
     if not tasks:
-        return {"message": "There is no tasks created."}
+        return {"message": "No tasks found."}
 
     result = [
         {
