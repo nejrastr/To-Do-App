@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 import re
 from app.models import User
 from app import db
-from ..schema.user_schema import UserSchema
+from ..schema.users import UserSchema
 from marshmallow import ValidationError
 
 

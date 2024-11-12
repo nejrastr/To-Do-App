@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from app.models import Task
 from datetime import datetime
-from ..schema.task_schema import TaskSchema
+from ..schema.tasks import TaskSchema
 from marshmallow import ValidationError
 
 tasks = Blueprint("tasks", __name__)

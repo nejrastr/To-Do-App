@@ -122,6 +122,7 @@ class Task(db.Model):
     updated_at = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
+    comments=db.relationship("Comment", backref="task", lazy=True)
 
 
 class Goal(db.Model):
@@ -152,3 +153,11 @@ class Event(db.Model):
     updated_at = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
+
+class Comment(db.Model):
+    __tablename__="comments"
+    id=db.Column(db.String(36), primary_key=True, default=lambda:str(uuid.uuid4()))
+    task_id=db.Column(db.String(36), db.ForeignKey("tasks.id"), nullable=False)
+    comment_text=db.Column(db.String(100), nullable=False)
+    created_at=db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at=db.Column(db.DateTime, default=datetime.utcnow)

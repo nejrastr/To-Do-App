@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.models import Goal
 from app import db
 from datetime import datetime
-from ..schema.goal_schema import GoalSchema
+from ..schema.goals import GoalSchema
 from marshmallow import ValidationError
 
 goals = Blueprint("goals", __name__)
