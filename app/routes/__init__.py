@@ -36,11 +36,13 @@ def create_app():
     from .events import events
     from .tasks import tasks
     from .main  import main
+    from .comments import comments
     app.register_blueprint(auth)
     app.register_blueprint(tasks)
     app.register_blueprint(events)
     app.register_blueprint(goals)
     app.register_blueprint(main)
+    app.register_blueprint(comments)
 
     with app.app_context():
 

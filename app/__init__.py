@@ -34,11 +34,13 @@ def create_app():
     from app.routes.events import events
     from app.routes.tasks import tasks
     from app.routes.main import main
+    from app.routes.comments import comments
     app.register_blueprint(auth)
     app.register_blueprint(tasks)
     app.register_blueprint(events)
     app.register_blueprint(goals)
     app.register_blueprint(main)
+    app.register_blueprint(comments)
 
     
     with app.app_context():

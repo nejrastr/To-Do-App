@@ -149,6 +149,7 @@ def get_event(guid):
         }
     )
 
+
 @events.route("/events", methods=["GET"])
 def get_events():
     """
@@ -201,23 +202,22 @@ def get_events():
       404:
         description: No events found
     """
-    
-    name=request.args.get("name")
-    date=request.args.get("date")
 
-    query=Event.query
+    name = request.args.get("name")
+    date = request.args.get("date")
+
+    query = Event.query
 
     if name:
-        query=query.filter(Event.name==name)
+        query = query.filter(Event.name == name)
     if date:
-        query=query.filter(Event.date==date)
+        query = query.filter(Event.date == date)
 
-    events=query.all()
+    events = query.all()
     if events is None:
-        return({"There is no created events."})
+        return {"There is no created events."}
 
     result = [
-        
         {
             "id": event.id,
             "user_id": event.user_id,
