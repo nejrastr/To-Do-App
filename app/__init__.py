@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 from app.extensions import  Swagger
+from flask_cors import CORS
 
 
 db = SQLAlchemy()  
@@ -10,6 +11,8 @@ db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
+
     app.config.from_object(Config)
     app.name="ToBeDo"
     template = {
