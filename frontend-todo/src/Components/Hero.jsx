@@ -27,7 +27,11 @@ export const Hero = () => {
         </div>
       </div>
       <div className="m-3">
-        <Button color="black" label="Start Planning Your Future"></Button>
+        <Button
+          navigateTo="/signup"
+          color="black"
+          label="Start Planning Your Future"
+        ></Button>
       </div>
     </div>
   );
