@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
-import api from "./services/api";
-import Navbar from "./Components/Navbar";
+import React from "react";
+
+import { HomePage } from "./Pages/Home/Home.js";
 
 function App() {
   return (
     <div>
-      <Navbar />
+      <HomePage />
     </div>
   );
 }
