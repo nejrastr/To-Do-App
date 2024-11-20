@@ -7,16 +7,24 @@ import { LoginPage } from "./Pages/SignUp/Login.js";
 import { useState } from "react";
 import { Navbar } from "./Pages/Navbar/Navbar.js";
 import { Tasks } from "./Pages/Tasks/Tasks.js";
+import { Goals } from "./Pages/Goals/Goals.js";
+import { Events } from "./Pages/Events/Events";
+import { ProfilePage } from "./Pages/Profile/Profile.js";
 
 function App() {
   const [isLogged, setIsLogged] = useState(false);
   return (
     <Router>
-      {isLogged && <Navbar />}
-
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/tasks" element={[<Navbar />, <Tasks />]}></Route>
+        <Route path="/tasks" isLogged="true" element={[<Tasks />]}></Route>
+        <Route path="/goals" isLogged="true" element={[<Goals />]}></Route>
+        <Route path="/events" isLogged="true" element={[<Events />]}></Route>
+        <Route
+          path="/profile"
+          isLogged="true"
+          element={[<ProfilePage />]}
+        ></Route>
         <Route
           path="/signup"
           setState="true"

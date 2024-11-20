@@ -1,12 +1,12 @@
 import React from "react";
 import { Navbar } from "../Navbar/Navbar";
 
-export const Tasks = () => {
+export const ProfilePage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-gray-900 dark:to-gray-800">
       <Navbar />
       <div className="flex items-center">
-        <h2>This is task page</h2>
+        <h2>This is profile page</h2>
       </div>
     </div>
   );

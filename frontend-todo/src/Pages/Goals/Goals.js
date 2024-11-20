@@ -1,9 +1,13 @@
 import React from "react";
+import { Navbar } from "../Navbar/Navbar";
 
 export const Goals = () => {
   return (
-    <div>
-      <h1>This is GOALS page</h1>
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-gray-900 dark:to-gray-800">
+      <Navbar />
+      <div className="flex items-center">
+        <h2>This is goals page</h2>
+      </div>
     </div>
   );
 };
